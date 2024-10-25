@@ -4,11 +4,13 @@ using ATMManagementApplication.Data;
 using System.Linq;
 using System.Net.Mail;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ATMManagementApplication.Controllers
 {
     [ApiController]
     [Route("api/atm")]
+    [Authorize]
     public class ATMController : ControllerBase
     {
         private readonly ATMContext _context;
@@ -27,19 +29,29 @@ namespace ATMManagementApplication.Controllers
             }
             else
             {
-                return Ok(new { balance = customer.Balance });
+                return Ok(new { balance = customer.Balance, name = customer.Name });
             }
         }
 
         [HttpGet("transaction/{customerId}")]
-        public IActionResult GetTranscationHistory(int customerId)
+        public IActionResult GetTransactionHistory(int customerId)
         {
             var customer = _context.Customers.Find(customerId);
             if (customer == null)
             {
                 return NotFound("Customer not found");
             }
-            var transactionHistory = _context.TransactionHistories.Where(th => th.CustomerId == customerId).OrderByDescending(th => th.Timestamp).ToList();
+            var transactionHistory = _context.TransactionHistories
+                                              .Where(th => th.CustomerId == customerId)
+                                              .OrderByDescending(th => th.Timestamp)
+                                              .Select(th => new
+                                              {
+                                                  th.TransactionType,
+                                                  th.Amount,
+                                                  th.Timestamp,
+                                                  th.IsSuccessful
+                                              }).ToList();
+
             return Ok(transactionHistory);
         }
 
@@ -47,8 +59,8 @@ namespace ATMManagementApplication.Controllers
         public IActionResult Withdraw([FromBody] WithdrawRequest request)
         {
             var customer = _context.Customers.Find(request.CustomerId);
-            if (customer == null) return NotFound("Customer not found");
-            if (customer.Balance < request.Amount) return BadRequest("Insufficient balance");
+            if (customer == null) return NotFound(new {message = "Customer not found"});
+            if (customer.Balance < request.Amount) return BadRequest(new {message = "Insufficient balance"});
 
             customer.Balance -= request.Amount;
 
@@ -70,8 +82,8 @@ namespace ATMManagementApplication.Controllers
         public IActionResult Deposit([FromBody] DepositRequest request)
         {
             var customer = _context.Customers.Find(request.CustomerId);
-            if (customer == null) return NotFound("Customer not found");
-            if (request.Amount <= 0) return BadRequest("Deposit amount should be greater than 0");
+            if (customer == null) return NotFound(new {message = "Customer not found"});
+            if (request.Amount <= 0) return BadRequest(new {message = "Deposit amount should be greater than 0"});
 
             customer.Balance += request.Amount;
 
@@ -95,10 +107,10 @@ namespace ATMManagementApplication.Controllers
             var sendCustomer = _context.Customers.Find(request.SendId);
             var receiveCustomer = _context.Customers.Find(request.ReceiveId);
 
-            if (sendCustomer == null) return NotFound("Send customer not found");
-            if (receiveCustomer == null) return NotFound("Receive customer not found");
-            if (request.Amount > sendCustomer.Balance) return BadRequest("Insufficient balance");
-            if (request.Amount <= 0) return BadRequest("Transfer amount should be greater than 0");
+            if (sendCustomer == null) return NotFound(new {message = "Send customer not found"});
+            if (receiveCustomer == null) return NotFound(new {message = "Receive customer not found"});
+            if (request.Amount > sendCustomer.Balance) return BadRequest(new {message = "Insufficient balance"});
+            if (request.Amount <= 0) return BadRequest(new {message = "Transfer amount should be greater than 0"});
 
             sendCustomer.Balance -= request.Amount;
             receiveCustomer.Balance += request.Amount;

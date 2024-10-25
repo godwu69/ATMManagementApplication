@@ -2,10 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ATMManagementApplication.Models{
     public class Customer{
-        [Key] //Annotations => primary key
+        [Key]
         public int CustomerId { get; set; }
-
-        [Required]
         public required string Name { get; set; }
 
         [Required]

@@ -109,3 +109,13 @@ D:\Code\ASP.NET\ATMManagementApplication\obj\Debug\net8.0\refint\ATMManagementAp
 D:\Code\ASP.NET\ATMManagementApplication\obj\Debug\net8.0\ATMManagementApplication.pdb
 D:\Code\ASP.NET\ATMManagementApplication\obj\Debug\net8.0\ATMManagementApplication.genruntimeconfig.cache
 D:\Code\ASP.NET\ATMManagementApplication\obj\Debug\net8.0\ref\ATMManagementApplication.dll
+D:\Code\ASP.NET\ATMManagementApplication\obj\Debug\net8.0\ATMManagementApplication.sourcelink.json
+D:\Code\ASP.NET\ATMManagementApplication\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Code\ASP.NET\ATMManagementApplication\bin\Debug\net8.0\Microsoft.Bcl.TimeProvider.dll
+D:\Code\ASP.NET\ATMManagementApplication\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+D:\Code\ASP.NET\ATMManagementApplication\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\Code\ASP.NET\ATMManagementApplication\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+D:\Code\ASP.NET\ATMManagementApplication\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+D:\Code\ASP.NET\ATMManagementApplication\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+D:\Code\ASP.NET\ATMManagementApplication\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+D:\Code\ASP.NET\ATMManagementApplication\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll

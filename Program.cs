@@ -1,20 +1,65 @@
 using Microsoft.EntityFrameworkCore;
 using ATMManagementApplication.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Add service to cintainer => thiet lap cau hinh data model
+// JWT
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
+
+// Add services to the container
 builder.Services.AddControllers();
-builder.Services.AddDbContext<ATMContext>(options => options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 33))));
+
+// Configure CORS to allow requests from specific origins
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
+
+// Configure DbContext for MySQL
+builder.Services.AddDbContext<ATMContext>(options => 
+    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+    new MySqlServerVersion(new Version(8, 0, 33))));
 
 var app = builder.Build();
 
-if(app.Environment.IsDevelopment()){
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
     app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAllOrigins");
+
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();
