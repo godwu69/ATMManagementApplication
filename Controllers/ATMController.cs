@@ -205,6 +205,25 @@ namespace ATMManagementApplication.Controllers
             return Ok(new { message = "OTP sent to your email." });
         }
 
+        [HttpPost("apply-interest")]
+        public IActionResult ApplyMonthlyInterest()
+        {
+            var customers = _context.Customers.ToList();
+
+            foreach (var customer in customers)
+            {
+                decimal interest = customer.Balance * MonthlyInterestRate;
+                customer.Balance += interest;
+
+                var interestTransaction = CreateTransaction(customer.CustomerId, "Interest", interest);
+                _context.Transactions.Add(interestTransaction);
+            }
+
+            _context.SaveChanges();
+
+            return Ok(new { message = "Monthly interest applied to all customers" });
+        }
+
 
         private Transaction CreateTransaction(int customerId, string transactionType, decimal amount)
         {
