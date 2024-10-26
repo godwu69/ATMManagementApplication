@@ -6,6 +6,7 @@ namespace ATMManagementApplication.Models{
         [Key]
         public int TransactionId { get; set; }
         public int CustomerId { get; set; }
+        public required string TransactionType { get; set; }
         public decimal Amount { get; set; }
         public DateTime Timestamp { get; set; }
         public bool IsSuccessful { get; set; }

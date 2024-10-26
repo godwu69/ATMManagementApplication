@@ -14,9 +14,11 @@ namespace ATMManagementApplication.Controllers
     public class ATMController : ControllerBase
     {
         private readonly ATMContext _context;
-        public ATMController(ATMContext context)
+        private readonly OtpService _otpService;
+        public ATMController(ATMContext context, OtpService otpService)
         {
             _context = context;
+            _otpService = otpService;
         }
 
         [HttpGet("balance/{customerId}")]
@@ -41,7 +43,7 @@ namespace ATMManagementApplication.Controllers
             {
                 return NotFound("Customer not found");
             }
-            var transactionHistory = _context.TransactionHistories
+            var transactionHistory = _context.Transactions
                                               .Where(th => th.CustomerId == customerId)
                                               .OrderByDescending(th => th.Timestamp)
                                               .Select(th => new
@@ -59,43 +61,89 @@ namespace ATMManagementApplication.Controllers
         public IActionResult Withdraw([FromBody] WithdrawRequest request)
         {
             var customer = _context.Customers.Find(request.CustomerId);
-            if (customer == null) return NotFound(new {message = "Customer not found"});
-            if (customer.Balance < request.Amount) return BadRequest(new {message = "Insufficient balance"});
+            if (customer == null) return NotFound(new { message = "Customer not found" });
+
+            if (!_otpService.ValidateOtp(customer.CustomerId, request.otp))
+            {
+                return BadRequest(new { message = "Invalid OTP" });
+            }
+
+            var limit = _context.TransactionLimits.FirstOrDefault(l => l.TransactionType == "Withdraw");
+            if (limit == null) return StatusCode(500, "Transaction limit not set for withdrawals.");
+
+            if (request.Amount > limit.SingleTransactionLimit)
+            {
+                return BadRequest(new { message = $"Exceeds single transaction limit of {limit.SingleTransactionLimit}" });
+            }
+
+            var totalDailyWithdrawn = _context.Transactions
+                .Where(t => t.CustomerId == request.CustomerId && t.TransactionType == "Withdraw" && t.Timestamp.Date == DateTime.Now.Date)
+                .Sum(t => t.Amount);
+
+            if (totalDailyWithdrawn + request.Amount > limit.DailyLimit)
+            {
+                return BadRequest(new { message = $"Exceeds daily withdrawal limit of {limit.DailyLimit}" });
+            }
+            if (customer.Balance < request.Amount) return BadRequest(new { message = "Insufficient balance" });
 
             customer.Balance -= request.Amount;
 
-            var transaction = CreateTransaction(request.CustomerId, request.Amount);
+            var transaction = CreateTransaction(request.CustomerId, "Withdraw", request.Amount);
             _context.Transactions.Add(transaction);
-
-            var transactionHistory = CreateTransactionHistory(transaction.TransactionId, request.CustomerId, "Withdraw", request.Amount);
-            _context.TransactionHistories.Add(transactionHistory);
 
             _context.SaveChanges();
 
             SendEmail(customer.Email, "Withdraw Confirmation", $"Dear {customer.Name}, you have successfully withdrawn {request.Amount}. Your new balance is {customer.Balance}.");
 
-            return Ok(new { message = "Withdraw successful", newBalance = customer.Balance });
+            _otpService.ClearOtp(customer.CustomerId);
 
+            return Ok(new { message = "Withdraw successful", newBalance = customer.Balance });
         }
+
+
 
         [HttpPost("deposit")]
         public IActionResult Deposit([FromBody] DepositRequest request)
         {
             var customer = _context.Customers.Find(request.CustomerId);
-            if (customer == null) return NotFound(new {message = "Customer not found"});
-            if (request.Amount <= 0) return BadRequest(new {message = "Deposit amount should be greater than 0"});
+            if (customer == null) return NotFound(new { message = "Customer not found" });
+
+            if (!_otpService.ValidateOtp(customer.CustomerId, request.otp))
+            {
+                return BadRequest(new { message = "Invalid OTP" });
+            }
+
+            var limit = _context.TransactionLimits.FirstOrDefault(l => l.TransactionType == "Deposit");
+            if (limit == null) return StatusCode(500, "Transaction limit not set for deposits.");
+
+            if (request.Amount > limit.SingleTransactionLimit)
+            {
+                return BadRequest(new { message = $"Exceeds single transaction limit of {limit.SingleTransactionLimit}" });
+            }
+
+            var totalDailyDeposit = _context.Transactions
+                .Where(t => t.CustomerId == request.CustomerId && t.TransactionType == "Deposit" && t.Timestamp.Date == DateTime.Now.Date)
+                .Sum(t => t.Amount);
+
+            if (totalDailyDeposit + request.Amount > limit.DailyLimit)
+            {
+                return BadRequest(new { message = $"Exceeds daily withdrawal limit of {limit.DailyLimit}" });
+            }
+
+            if (request.Amount <= 0) return BadRequest(new { message = "Deposit amount should be greater than 0" });
+
 
             customer.Balance += request.Amount;
 
-            var transaction = CreateTransaction(request.CustomerId, request.Amount);
+            var transaction = CreateTransaction(request.CustomerId, "Deposit", request.Amount);
             _context.Transactions.Add(transaction);
 
-            var transactionHistory = CreateTransactionHistory(transaction.TransactionId, request.CustomerId, "Deposit", request.Amount);
-            _context.TransactionHistories.Add(transactionHistory);
 
             _context.SaveChanges();
 
             SendEmail(customer.Email, "Deposit Confirmation", $"Dear {customer.Name}, you have successfully deposit {request.Amount}. Your new balance is {customer.Balance}.");
+
+            _otpService.ClearOtp(customer.CustomerId);
 
             return Ok(new { message = "Deposit successful", newBalance = customer.Balance });
 
@@ -107,46 +155,68 @@ namespace ATMManagementApplication.Controllers
             var sendCustomer = _context.Customers.Find(request.SendId);
             var receiveCustomer = _context.Customers.Find(request.ReceiveId);
 
-            if (sendCustomer == null) return NotFound(new {message = "Send customer not found"});
-            if (receiveCustomer == null) return NotFound(new {message = "Receive customer not found"});
-            if (request.Amount > sendCustomer.Balance) return BadRequest(new {message = "Insufficient balance"});
-            if (request.Amount <= 0) return BadRequest(new {message = "Transfer amount should be greater than 0"});
+            if (sendCustomer == null) return NotFound(new { message = "Send customer not found" });
+            if (receiveCustomer == null) return NotFound(new { message = "Receive customer not found" });
+
+            if (!_otpService.ValidateOtp(sendCustomer.CustomerId, request.otp))
+            {
+                return BadRequest(new { message = "Invalid OTP" });
+            }
+
+            var limit = _context.TransactionLimits.FirstOrDefault(l => l.TransactionType == "Transfer");
+            if (limit == null) return StatusCode(500, "Transaction limit not set for transfers.");
+
+            if (request.Amount > limit.SingleTransactionLimit)
+            {
+                return BadRequest(new { message = $"Exceeds single transaction limit of {limit.SingleTransactionLimit}" });
+            }
+
+            var totalDailyTransfer = _context.Transactions
+                .Where(t => t.CustomerId == request.SendId && t.TransactionType == "Transfer" && t.Timestamp.Date == DateTime.Now.Date)
+                .Sum(t => t.Amount);
+
+            if (totalDailyTransfer + request.Amount > limit.DailyLimit)
+            {
+                return BadRequest(new { message = $"Exceeds daily withdrawal limit of {limit.DailyLimit}" });
+            }
+
+            if (request.Amount > sendCustomer.Balance) return BadRequest(new { message = "Insufficient balance" });
+            if (request.Amount <= 0) return BadRequest(new { message = "Transfer amount should be greater than 0" });
 
             sendCustomer.Balance -= request.Amount;
             receiveCustomer.Balance += request.Amount;
 
-            var sendTransaction = CreateTransaction(request.SendId, request.Amount);
-            var receiveTransaction = CreateTransaction(request.ReceiveId, request.Amount);
+            var sendTransaction = CreateTransaction(request.SendId, "Send", request.Amount);
+            var receiveTransaction = CreateTransaction(request.ReceiveId, "Receive", request.Amount);
             _context.Transactions.AddRange(sendTransaction, receiveTransaction);
-
-            var sendTransactionHistory = CreateTransactionHistory(sendTransaction.TransactionId, request.SendId, "Send", request.Amount);
-            var receiveTransactionHistory = CreateTransactionHistory(receiveTransaction.TransactionId, request.ReceiveId, "Receive", request.Amount);
-            _context.TransactionHistories.AddRange(sendTransactionHistory, receiveTransactionHistory);
 
             _context.SaveChanges();
 
             SendEmail(sendCustomer.Email, "Transfer Confirmation", $"Dear {sendCustomer.Name}, you have successfully send {request.Amount} to {receiveCustomer.Name}. Your new balance is {sendCustomer.Balance}.");
             SendEmail(receiveCustomer.Email, "Transfer Confirmation", $"Dear {receiveCustomer.Name}, you have successfully receive {request.Amount} from {sendCustomer.Name}. Your new balance is {receiveCustomer.Balance}.");
 
+            _otpService.ClearOtp(sendCustomer.CustomerId);
+
             return Ok(new { message = "Transfer successful" });
         }
 
-        private Transaction CreateTransaction(int customerId, decimal amount)
+        [HttpPost("request-otp")]
+        public IActionResult RequestOtp([FromBody] GetCodeRequest request)
+        {
+            var customer = _context.Customers.Find(request.CustomerId);
+            if (customer == null) return NotFound(new { message = "Customer not found" });
+
+            string otp = _otpService.GenerateOtp(request.CustomerId);
+            SendEmail(customer.Email, "Your OTP Code", $"Your OTP for the transaction is: {otp}");
+
+            return Ok(new { message = "OTP sent to your email." });
+        }
+
+
+        private Transaction CreateTransaction(int customerId, string transactionType, decimal amount)
         {
             return new Transaction
             {
-                CustomerId = customerId,
-                Amount = amount,
-                Timestamp = DateTime.Now,
-                IsSuccessful = true
-            };
-        }
-
-        private TransactionHistory CreateTransactionHistory(int transactionId, int customerId, string transactionType, decimal amount)
-        {
-            return new TransactionHistory
-            {
-                TransactionId = transactionId,
                 CustomerId = customerId,
                 TransactionType = transactionType,
                 Amount = amount,
@@ -176,18 +246,19 @@ namespace ATMManagementApplication.Controllers
 
             smtpClient.Send(mailMessage);
         }
-
     }
     public class WithdrawRequest
     {
         public int CustomerId { get; set; }
         public decimal Amount { get; set; }
+        public required string otp { get; set; }
     }
 
     public class DepositRequest
     {
         public int CustomerId { get; set; }
         public decimal Amount { get; set; }
+        public required string otp { get; set; }
     }
 
     public class TransferRequest
@@ -195,5 +266,39 @@ namespace ATMManagementApplication.Controllers
         public int SendId { get; set; }
         public int ReceiveId { get; set; }
         public decimal Amount { get; set; }
+        public required string otp { get; set; }
     }
+
+    public class GetCodeRequest
+    {
+        public int CustomerId { get; set; }
+    }
+
+    public class OtpService
+    {
+        private readonly Dictionary<int, string> _otpStore = new Dictionary<int, string>();
+        private readonly Random _random = new Random();
+
+        public string GenerateOtp(int customerId)
+        {
+            string otp = _random.Next(100000, 999999).ToString();
+            _otpStore[customerId] = otp;
+            return otp;
+        }
+
+        public bool ValidateOtp(int customerId, string otp)
+        {
+            if (_otpStore.TryGetValue(customerId, out var storedOtp))
+            {
+                return storedOtp == otp;
+            }
+            return false;
+        }
+
+        public void ClearOtp(int customerId)
+        {
+            _otpStore.Remove(customerId);
+        }
+    }
+
 }

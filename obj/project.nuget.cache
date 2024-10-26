@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "BuePKhbBY2Q=",
+  "dgSpecHash": "KK7Loqhxsn0=",
   "success": true,
-  "projectFilePath": "D:\\Code\\ASP.NET\\ATMManagementApplication\\ATMManagementApplication.csproj",
+  "projectFilePath": "D:\\ATM\\ATMManagementApplication\\ATMManagementApplication.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\godwu\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\godwu\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\8.0.10\\microsoft.aspnetcore.authentication.jwtbearer.8.0.10.nupkg.sha512",

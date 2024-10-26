@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ATMManagementApplication.Models{
-    public class Customer{
+namespace ATMManagementApplication.Models
+{
+    public class Customer
+    {
         [Key]
         public int CustomerId { get; set; }
         public required string Name { get; set; }
@@ -11,7 +13,7 @@ namespace ATMManagementApplication.Models{
 
         [Required]
         public required string Email { get; set; }
-        
+
         public decimal Balance { get; set; }
     }
 }

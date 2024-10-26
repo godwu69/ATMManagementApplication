@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ATMManagementApplication.Migrations
 {
     [DbContext(typeof(ATMContext))]
-    [Migration("20241022063714_InitialCreate")]
+    [Migration("20241025104927_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -73,41 +73,59 @@ namespace ATMManagementApplication.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.HasKey("TransactionId");
 
                     b.ToTable("Transactions");
                 });
 
-            modelBuilder.Entity("ATMManagementApplication.Models.TransactionHistory", b =>
+            modelBuilder.Entity("ATMManagementApplication.Models.TransactionLimit", b =>
                 {
-                    b.Property<int>("TransactionHistoryId")
+                    b.Property<int>("LimitId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TransactionHistoryId"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("LimitId"));
 
-                    b.Property<decimal>("Amount")
+                    b.Property<decimal>("DailyLimit")
                         .HasColumnType("decimal(65,30)");
 
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsSuccessful")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("TransactionId")
-                        .HasColumnType("int");
+                    b.Property<decimal>("SingleTransactionLimit")
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<string>("TransactionType")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.HasKey("TransactionHistoryId");
+                    b.HasKey("LimitId");
 
-                    b.ToTable("TransactionHistories");
+                    b.ToTable("TransactionLimits");
+
+                    b.HasData(
+                        new
+                        {
+                            LimitId = 1,
+                            DailyLimit = 100000m,
+                            SingleTransactionLimit = 10000m,
+                            TransactionType = "Withdraw"
+                        },
+                        new
+                        {
+                            LimitId = 2,
+                            DailyLimit = 100000m,
+                            SingleTransactionLimit = 10000m,
+                            TransactionType = "Deposit"
+                        },
+                        new
+                        {
+                            LimitId = 3,
+                            DailyLimit = 80000m,
+                            SingleTransactionLimit = 8000m,
+                            TransactionType = "Transfer"
+                        });
                 });
 #pragma warning restore 612, 618
         }

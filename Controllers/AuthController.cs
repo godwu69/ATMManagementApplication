@@ -66,7 +66,7 @@ namespace ATMManagementApplication.Controllers
 
             var token = GenerateJwtToken(customer);
 
-            return Ok(new { message = "Login successful", customerId = customer.CustomerId, token });
+            return Ok(new { message = "Login successful", customerId = customer.CustomerId, email = customer.Email, token });
         }
 
         [AllowAnonymous]
@@ -81,7 +81,7 @@ namespace ATMManagementApplication.Controllers
                 Name = request.Name,
                 Password = request.Password,
                 Email = request.Email,
-                Balance = 0
+                Balance = 999999999
             };
             _context.Customers.Add(newCustomer);
             _context.SaveChanges();

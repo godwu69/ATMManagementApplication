@@ -2985,11 +2985,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Code\\ASP.NET\\ATMManagementApplication\\ATMManagementApplication.csproj",
+      "projectUniqueName": "D:\\ATM\\ATMManagementApplication\\ATMManagementApplication.csproj",
       "projectName": "ATMManagementApplication",
-      "projectPath": "D:\\Code\\ASP.NET\\ATMManagementApplication\\ATMManagementApplication.csproj",
+      "projectPath": "D:\\ATM\\ATMManagementApplication\\ATMManagementApplication.csproj",
       "packagesPath": "C:\\Users\\godwu\\.nuget\\packages\\",
-      "outputPath": "D:\\Code\\ASP.NET\\ATMManagementApplication\\obj\\",
+      "outputPath": "D:\\ATM\\ATMManagementApplication\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\godwu\\AppData\\Roaming\\NuGet\\NuGet.Config"

@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace ATMManagementApplication.Migrations
 {
     /// <inheritdoc />
@@ -36,22 +38,19 @@ namespace ATMManagementApplication.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "TransactionHistories",
+                name: "TransactionLimits",
                 columns: table => new
                 {
-                    TransactionHistoryId = table.Column<int>(type: "int", nullable: false)
+                    LimitId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    CustomerId = table.Column<int>(type: "int", nullable: false),
-                    TransactionId = table.Column<int>(type: "int", nullable: false),
                     TransactionType = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Amount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    IsSuccessful = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    DailyLimit = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    SingleTransactionLimit = table.Column<decimal>(type: "decimal(65,30)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TransactionHistories", x => x.TransactionHistoryId);
+                    table.PrimaryKey("PK_TransactionLimits", x => x.LimitId);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -62,6 +61,8 @@ namespace ATMManagementApplication.Migrations
                     TransactionId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     CustomerId = table.Column<int>(type: "int", nullable: false),
+                    TransactionType = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Amount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsSuccessful = table.Column<bool>(type: "tinyint(1)", nullable: false)
@@ -71,6 +72,16 @@ namespace ATMManagementApplication.Migrations
                     table.PrimaryKey("PK_Transactions", x => x.TransactionId);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.InsertData(
+                table: "TransactionLimits",
+                columns: new[] { "LimitId", "DailyLimit", "SingleTransactionLimit", "TransactionType" },
+                values: new object[,]
+                {
+                    { 1, 100000m, 10000m, "Withdraw" },
+                    { 2, 100000m, 10000m, "Deposit" },
+                    { 3, 80000m, 8000m, "Transfer" }
+                });
         }
 
         /// <inheritdoc />
@@ -80,7 +91,7 @@ namespace ATMManagementApplication.Migrations
                 name: "Customers");
 
             migrationBuilder.DropTable(
-                name: "TransactionHistories");
+                name: "TransactionLimits");
 
             migrationBuilder.DropTable(
                 name: "Transactions");
