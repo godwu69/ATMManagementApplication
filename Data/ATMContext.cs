@@ -12,7 +12,6 @@ namespace ATMManagementApplication.Data{
         {
             modelBuilder.Entity<TransactionLimit>().HasData(
                 new TransactionLimit { LimitId = 1, TransactionType = "Withdraw", DailyLimit = 100000, SingleTransactionLimit = 10000 },
-                new TransactionLimit { LimitId = 2, TransactionType = "Deposit", DailyLimit = 100000, SingleTransactionLimit = 10000 },
                 new TransactionLimit { LimitId = 3, TransactionType = "Transfer", DailyLimit = 80000, SingleTransactionLimit = 8000 }
             );
         }

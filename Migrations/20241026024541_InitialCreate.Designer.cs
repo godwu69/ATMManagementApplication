@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ATMManagementApplication.Migrations
 {
     [DbContext(typeof(ATMContext))]
-    [Migration("20241025104927_InitialCreate")]
+    [Migration("20241026024541_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -111,13 +111,6 @@ namespace ATMManagementApplication.Migrations
                             DailyLimit = 100000m,
                             SingleTransactionLimit = 10000m,
                             TransactionType = "Withdraw"
-                        },
-                        new
-                        {
-                            LimitId = 2,
-                            DailyLimit = 100000m,
-                            SingleTransactionLimit = 10000m,
-                            TransactionType = "Deposit"
                         },
                         new
                         {

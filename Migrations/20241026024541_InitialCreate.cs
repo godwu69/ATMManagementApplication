@@ -79,7 +79,6 @@ namespace ATMManagementApplication.Migrations
                 values: new object[,]
                 {
                     { 1, 100000m, 10000m, "Withdraw" },
-                    { 2, 100000m, 10000m, "Deposit" },
                     { 3, 80000m, 8000m, "Transfer" }
                 });
         }

@@ -111,13 +111,6 @@ namespace ATMManagementApplication.Migrations
                         },
                         new
                         {
-                            LimitId = 2,
-                            DailyLimit = 100000m,
-                            SingleTransactionLimit = 10000m,
-                            TransactionType = "Deposit"
-                        },
-                        new
-                        {
                             LimitId = 3,
                             DailyLimit = 80000m,
                             SingleTransactionLimit = 8000m,

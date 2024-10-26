@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\ATM\\ATMManagementApplication\\ATMManagementApplication.csproj": {}
+    "D:\\Code\\ATMManagementApplication\\ATMManagementApplication.csproj": {}
   },
   "projects": {
-    "D:\\ATM\\ATMManagementApplication\\ATMManagementApplication.csproj": {
+    "D:\\Code\\ATMManagementApplication\\ATMManagementApplication.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\ATM\\ATMManagementApplication\\ATMManagementApplication.csproj",
+        "projectUniqueName": "D:\\Code\\ATMManagementApplication\\ATMManagementApplication.csproj",
         "projectName": "ATMManagementApplication",
-        "projectPath": "D:\\ATM\\ATMManagementApplication\\ATMManagementApplication.csproj",
+        "projectPath": "D:\\Code\\ATMManagementApplication\\ATMManagementApplication.csproj",
         "packagesPath": "C:\\Users\\godwu\\.nuget\\packages\\",
-        "outputPath": "D:\\ATM\\ATMManagementApplication\\obj\\",
+        "outputPath": "D:\\Code\\ATMManagementApplication\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\godwu\\AppData\\Roaming\\NuGet\\NuGet.Config"
