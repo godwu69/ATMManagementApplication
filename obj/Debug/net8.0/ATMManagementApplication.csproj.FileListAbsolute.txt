@@ -361,3 +361,8 @@ D:\Code\ATMManagementApplication\obj\Debug\net8.0\refint\ATMManagementApplicatio
 D:\Code\ATMManagementApplication\obj\Debug\net8.0\ATMManagementApplication.pdb
 D:\Code\ATMManagementApplication\obj\Debug\net8.0\ATMManagementApplication.genruntimeconfig.cache
 D:\Code\ATMManagementApplication\obj\Debug\net8.0\ref\ATMManagementApplication.dll
+D:\Code\ATMManagementApplication\bin\Debug\net8.0\publish\web.config
+D:\Code\ATMManagementApplication\bin\Debug\net8.0\publish\appsettings.Development.json
+D:\Code\ATMManagementApplication\bin\Debug\net8.0\publish\appsettings.json
+D:\Code\ATMManagementApplication\bin\Debug\net8.0\publish\ATMManagementApplication.deps.json
+D:\Code\ATMManagementApplication\bin\Debug\net8.0\publish\ATMManagementApplication.runtimeconfig.json
